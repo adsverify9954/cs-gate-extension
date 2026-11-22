@@ -1,0 +1,23 @@
+[
+    {
+        "fileHash": "sha256-f9313a40f4679042ce769c04329cacd2cb6a398419f621b713408ccc9aede023",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/adsverify9954/cs-gate-extension",
+        "fileSize": 22194,
+        "status": 1,
+        "language": "en",
+        "authors": [
+            "sgdys"
+        ],
+        "tvTypes": [
+            "Anime",
+            "Movie",
+            "TvSeries"
+        ],
+        "version": 1,
+        "internalName": "GateProvider",
+        "description": "The Gate \u2014 tumhara personal OTT addon ab CloudStream pe. Anime, Movies, Series aur TV ka catalog + streams seedha The Gate worker se.",
+        "url": "https://raw.githubusercontent.com/adsverify9954/cs-gate-extension/builds/GateProvider.cs3",
+        "name": "GateProvider"
+    }
+]

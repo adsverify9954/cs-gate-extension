@@ -51,7 +51,9 @@ Phone pe direct test (ADB connected, CloudStream installed):
 
 1. Is folder ko GitHub pe push karo (naya repo, e.g. `cs-gate-extension`)
 2. Actions pehle push pe khud build karega aur **`builds` branch** me `.cs3` + `plugins.json` daal dega
-3. Repository URL: `https://raw.githubusercontent.com/<user>/<repo>/builds/plugins.json`
+3. Repository URL: `https://raw.githubusercontent.com/<user>/<repo>/builds/repo.json`
+   - ⚠️ CloudStream me **`repo.json`** (manifest object, `manifestVersion: 2` + `pluginLists`) add hota hai —
+   `plugins.json` (array) nahi! plugins.json ka URL dala to *"repo.json did not return a JSON object"* error aata hai.
 4. CloudStream app → Settings → Extensions → Add Repository → ye URL paste karo ✅
 
 ## Hosts / Extractors

@@ -1,0 +1,6 @@
+{
+  "name": "The Gate CS Repo",
+  "pluginLists": [
+    "https://raw.githubusercontent.com/adsverify9954/cs-gate-extension/builds/plugins.json"
+  ]
+}

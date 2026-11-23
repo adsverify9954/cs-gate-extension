@@ -203,18 +203,23 @@ class GateProvider : MainAPI() {
         }
         if (streams.isEmpty()) return false
 
-        var found = false
-        streams.forEach { stream ->
-            val link = stream.url ?: return@forEach
-            // Poori tarah se sirf The Gate: direct ho ya embed, har link worker ke /resolve se guzarta hai.
-            // Koi built-in extractor fallback nahi — resolve fail ho to stream dikhai hi nahi deta.
+        // Best video server choose karo — worker wali ranking ka exact mirror.
+        // Sirf top-ranked stream The Gate /resolve pe bhejein (baaki ko ignore).
+        val ranked = streams
+            .mapNotNull { stream -> stream.url?.let { it to GateBestServer.score(it) } }
+            .sortedByDescending { it.second }
+        if (ranked.isEmpty()) return false
+
+        for ((link, _) in ranked) {
+            // Poori tarah se sirf The Gate: link worker ke /resolve se guzarta hai.
+            // Koi built-in extractor fallback nahi — resolve fail ho to agla ranked stream try karo.
             val resolved = try {
                 app.get("$mainUrl/resolve?url=${URLEncoder.encode(link, "UTF-8")}")
                     .parsed<GateResolve>().takeIf { it.ok && !it.url.isNullOrBlank() }
             } catch (_: Exception) {
                 null
             }
-            if (resolved == null) return@forEach
+            if (resolved == null) continue
             try {
                 callback(
                     ExtractorLink(
@@ -227,11 +232,11 @@ class GateProvider : MainAPI() {
                         type = if (resolved.type == "m3u8") ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO,
                     )
                 )
-                found = true
+                return true
             } catch (_: Exception) {
-                // agle stream pe chalein
+                // agle ranked stream pe chalein
             }
         }
-        return found
+        return false
     }
 }

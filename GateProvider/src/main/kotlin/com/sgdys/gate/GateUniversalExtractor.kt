@@ -6,6 +6,7 @@ import com.lagradost.cloudstream3.utils.ExtractorApi
 import com.lagradost.cloudstream3.utils.ExtractorLink
 import com.lagradost.cloudstream3.utils.ExtractorLinkType
 import com.lagradost.cloudstream3.utils.Qualities
+import com.lagradost.cloudstream3.utils.loadExtractor
 import java.net.URLEncoder
 
 /**
@@ -25,6 +26,26 @@ class GateUniversalExtractor : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
+        // Streamtape IP-locked hai — device-side extractor se chalao
+        if (url.contains("streamtape", ignoreCase = true)) {
+            try {
+                loadExtractor(url, url, subtitleCallback) { ex ->
+                    callback(
+                        ExtractorLink(
+                            source = "The Gate",
+                            name = "The Gate · Streamtape",
+                            url = ex.url,
+                            referer = ex.referer ?: "",
+                            quality = ex.quality,
+                            headers = ex.headers,
+                            type = ex.type,
+                        )
+                    )
+                }
+            } catch (_: Exception) { }
+            return
+        }
+
         val resolved = try {
             app.get("https://my-anime-gate.unityads9954.workers.dev/resolve?url=${URLEncoder.encode(url, "UTF-8")}")
                 .parsed<GateResolve>().takeIf { it.ok && !it.url.isNullOrBlank() }

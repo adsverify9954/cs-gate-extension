@@ -1,5 +1,5 @@
 // Use an integer for version numbers — har release pe bump karo
-version = 6
+version = 7
 
 cloudstream {
     description = "The Gate — sirf The Gate. Har video link worker ke /resolve se, direct m3u8 + headers. Koi doosra source nahi."

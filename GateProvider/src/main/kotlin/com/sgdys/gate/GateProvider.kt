@@ -211,8 +211,29 @@ class GateProvider : MainAPI() {
         if (ranked.isEmpty()) return false
 
         for ((link, _) in ranked) {
-            // Poori tarah se sirf The Gate: link worker ke /resolve se guzarta hai.
-            // Koi built-in extractor fallback nahi — resolve fail ho to agla ranked stream try karo.
+            // Streamtape ke download links IP-locked hote hain — worker se phone pe chalte nahi.
+            // Inhe device-side built-in extractor se chalao (name "The Gate" hi dikhega).
+            if (link.contains("streamtape", ignoreCase = true)) {
+                val ok = try {
+                    loadExtractor(link, link, subtitleCallback) { ex ->
+                        callback(
+                            ExtractorLink(
+                                source = name,
+                                name = "The Gate · Streamtape",
+                                url = ex.url,
+                                referer = ex.referer ?: "",
+                                quality = ex.quality,
+                                headers = ex.headers,
+                                type = ex.type,
+                            )
+                        )
+                    }
+                } catch (_: Exception) { false }
+                if (ok) return true
+                continue
+            }
+
+            // Baaki sab hosts: link The Gate /resolve se guzarta hai (direct m3u8/mp4 + headers).
             val resolved = try {
                 app.get("$mainUrl/resolve?url=${URLEncoder.encode(link, "UTF-8")}")
                     .parsed<GateResolve>().takeIf { it.ok && !it.url.isNullOrBlank() }

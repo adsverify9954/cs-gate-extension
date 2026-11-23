@@ -49,6 +49,15 @@ data class GateBehaviorHints(val proxyHeaders: GateProxyHeaders? = null)
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class GateProxyHeaders(val request: Map<String, String> = emptyMap())
 
+// The Gate /resolve response — CloudStream ka koi bhi video link worker ko bhejne par
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class GateResolve(
+    val ok: Boolean = false,
+    val url: String? = null,
+    val type: String? = null,
+    val headers: Map<String, String> = emptyMap(),
+)
+
 class GateProvider : MainAPI() {
     override var mainUrl = "https://my-anime-gate.unityads9954.workers.dev"
     override var name = "The Gate"
@@ -222,13 +231,43 @@ class GateProvider : MainAPI() {
                     // header parse me problem ho to bhi baaki streams try karo
                 }
             } else {
-                // Streamtape / MixDrop / Vidmoly jaise embeds CloudStream ke built-in extractors se resolve hote hain
-                val ok = try {
-                    loadExtractor(link, link, subtitleCallback, callback)
+                // Pehle link The Gate worker ko bhejo (/resolve) — worker embed se direct m3u8/mp4 nikal ke dega.
+                // Worker abhi deploy na hua ho (404) ya resolve fail ho to built-in extractors pe fallback.
+                val resolved = try {
+                    app.get("$mainUrl/resolve?url=${URLEncoder.encode(link, "UTF-8")}")
+                        .parsed<GateResolve>().takeIf { it.ok && !it.url.isNullOrBlank() }
                 } catch (_: Exception) {
-                    false
+                    null
                 }
-                if (ok) found = true
+                var gateDone = false
+                if (resolved != null) {
+                    try {
+                        callback(
+                            ExtractorLink(
+                                source = name,
+                                name = "The Gate · Resolve",
+                                url = resolved.url!!,
+                                referer = resolved.headers["Referer"] ?: "",
+                                quality = Qualities.Unknown.value,
+                                headers = resolved.headers,
+                                type = if (resolved.type == "m3u8") ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO,
+                            )
+                        )
+                        gateDone = true
+                        found = true
+                    } catch (_: Exception) {
+                        // resolve mila par callback fail — fallback neeche
+                    }
+                }
+                if (!gateDone) {
+                    // Streamtape / MixDrop / Vidmoly jaise embeds CloudStream ke built-in extractors se resolve hote hain
+                    val ok = try {
+                        loadExtractor(link, link, subtitleCallback, callback)
+                    } catch (_: Exception) {
+                        false
+                    }
+                    if (ok) found = true
+                }
             }
         }
         return found

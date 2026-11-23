@@ -1,8 +1,8 @@
 // Use an integer for version numbers — har release pe bump karo
-version = 1
+version = 2
 
 cloudstream {
-    description = "The Gate — tumhara personal OTT addon ab CloudStream pe. Anime, Movies, Series aur TV ka catalog + streams seedha The Gate worker se."
+    description = "The Gate — sirf The Gate. Har video link worker ke /resolve se, direct m3u8 + headers. Koi doosra source nahi."
     authors = listOf("sgdys")
 
     /**

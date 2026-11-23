@@ -206,68 +206,30 @@ class GateProvider : MainAPI() {
         var found = false
         streams.forEach { stream ->
             val link = stream.url ?: return@forEach
-            val headers = stream.behaviorHints?.proxyHeaders?.request ?: emptyMap()
-            val path = link.substringBefore("?")
-            // Worker already resolve karke direct .m3u8/.mp4 + proxyHeaders de sakta hai (UFOload waghera),
-            // ya phir embed page ka URL (Streamtape/MixDrop) jo CloudStream ke built-in extractor se khulega
-            val isDirect = path.endsWith(".m3u8") || path.endsWith(".mp4")
-                    || stream.behaviorHints?.proxyHeaders != null
-
-            if (isDirect) {
-                try {
-                    callback(
-                        ExtractorLink(
-                            source = name,
-                            name = stream.name ?: name,
-                            url = link,
-                            referer = headers["Referer"] ?: "",
-                            quality = Qualities.Unknown.value,
-                            headers = headers,
-                            type = if (path.endsWith(".m3u8")) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO,
-                        )
+            // Poori tarah se sirf The Gate: direct ho ya embed, har link worker ke /resolve se guzarta hai.
+            // Koi built-in extractor fallback nahi — resolve fail ho to stream dikhai hi nahi deta.
+            val resolved = try {
+                app.get("$mainUrl/resolve?url=${URLEncoder.encode(link, "UTF-8")}")
+                    .parsed<GateResolve>().takeIf { it.ok && !it.url.isNullOrBlank() }
+            } catch (_: Exception) {
+                null
+            }
+            if (resolved == null) return@forEach
+            try {
+                callback(
+                    ExtractorLink(
+                        source = name,
+                        name = "The Gate · Resolve",
+                        url = resolved.url!!,
+                        referer = resolved.headers["Referer"] ?: "",
+                        quality = Qualities.Unknown.value,
+                        headers = resolved.headers,
+                        type = if (resolved.type == "m3u8") ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO,
                     )
-                    found = true
-                } catch (_: Exception) {
-                    // header parse me problem ho to bhi baaki streams try karo
-                }
-            } else {
-                // Pehle link The Gate worker ko bhejo (/resolve) — worker embed se direct m3u8/mp4 nikal ke dega.
-                // Worker abhi deploy na hua ho (404) ya resolve fail ho to built-in extractors pe fallback.
-                val resolved = try {
-                    app.get("$mainUrl/resolve?url=${URLEncoder.encode(link, "UTF-8")}")
-                        .parsed<GateResolve>().takeIf { it.ok && !it.url.isNullOrBlank() }
-                } catch (_: Exception) {
-                    null
-                }
-                var gateDone = false
-                if (resolved != null) {
-                    try {
-                        callback(
-                            ExtractorLink(
-                                source = name,
-                                name = "The Gate · Resolve",
-                                url = resolved.url!!,
-                                referer = resolved.headers["Referer"] ?: "",
-                                quality = Qualities.Unknown.value,
-                                headers = resolved.headers,
-                                type = if (resolved.type == "m3u8") ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO,
-                            )
-                        )
-                        gateDone = true
-                        found = true
-                    } catch (_: Exception) {
-                        // resolve mila par callback fail — fallback neeche
-                    }
-                }
-                if (!gateDone) {
-                    // Streamtape / MixDrop / Vidmoly jaise embeds CloudStream ke built-in extractors se resolve hote hain
-                    val ok = try {
-                        loadExtractor(link, link, subtitleCallback, callback)
-                    } catch (_: Exception) {
-                        false
-                    }
-                    if (ok) found = true
-                }
+                )
+                found = true
+            } catch (_: Exception) {
+                // agle stream pe chalein
             }
         }
         return found

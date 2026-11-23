@@ -1,0 +1,9 @@
+{
+  "name": "The Gate Only",
+  "description": "Sirf The Gate - koi doosra source nahi. Har video link /resolve se.",
+  "iconUrl": "https://my-anime-gate.unityads9954.workers.dev/logo.svg",
+  "manifestVersion": 2,
+  "pluginLists": [
+    "https://raw.githubusercontent.com/adsverify9954/cs-gate-extension/builds/plugins-gate.json"
+  ]
+}

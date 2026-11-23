@@ -214,7 +214,7 @@ class GateProvider : MainAPI() {
             // Poori tarah se sirf The Gate: link worker ke /resolve se guzarta hai.
             // Koi built-in extractor fallback nahi — resolve fail ho to agla ranked stream try karo.
             val resolved = try {
-                app.get("$mainUrl/resolve?url=${URLEncoder.encode(link, "UTF-8")}&proxy=1")
+                app.get("$mainUrl/resolve?url=${URLEncoder.encode(link, "UTF-8")}")
                     .parsed<GateResolve>().takeIf { it.ok && !it.url.isNullOrBlank() }
             } catch (_: Exception) {
                 null

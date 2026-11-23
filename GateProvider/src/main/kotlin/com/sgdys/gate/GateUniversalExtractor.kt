@@ -26,7 +26,7 @@ class GateUniversalExtractor : ExtractorApi() {
         callback: (ExtractorLink) -> Unit
     ) {
         val resolved = try {
-            app.get("https://my-anime-gate.unityads9954.workers.dev/resolve?url=${URLEncoder.encode(url, "UTF-8")}&proxy=1")
+            app.get("https://my-anime-gate.unityads9954.workers.dev/resolve?url=${URLEncoder.encode(url, "UTF-8")}")
                 .parsed<GateResolve>().takeIf { it.ok && !it.url.isNullOrBlank() }
         } catch (_: Exception) {
             null

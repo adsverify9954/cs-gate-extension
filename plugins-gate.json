@@ -1,0 +1,23 @@
+[
+  {
+    "fileHash": "sha256-80079e674851f2307108b8eb67c31f6675efb2cc109eb50524c9b4b762944dcc",
+    "apiVersion": 1,
+    "repositoryUrl": "https://github.com/adsverify9954/cs-gate-extension",
+    "fileSize": 22905,
+    "status": 1,
+    "language": "en",
+    "authors": [
+      "sgdys"
+    ],
+    "tvTypes": [
+      "Anime",
+      "Movie",
+      "TvSeries"
+    ],
+    "version": 2,
+    "internalName": "GateProvider",
+    "description": "The Gate \u2014 sirf The Gate. Har video link worker ke /resolve se, direct m3u8 + headers. Koi doosra source nahi.",
+    "url": "https://raw.githubusercontent.com/adsverify9954/cs-gate-extension/builds/GateProvider.cs3",
+    "name": "GateProvider"
+  }
+]

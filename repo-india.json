@@ -1,0 +1,9 @@
+{
+    "name": "The Gate India 🇮🇳 (Delhi / SAI Networks)",
+    "description": "Location-optimized: Hindi + Bangla + English + Tamil + Telugu - 301 best plugins for India",
+    "iconUrl": "https://my-anime-gate.unityads9954.workers.dev/logo.svg",
+    "manifestVersion": 2,
+    "pluginLists": [
+        "https://raw.githubusercontent.com/adsverify9954/cs-gate-extension/builds/plugins-india.json"
+    ]
+}

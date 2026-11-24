@@ -9,6 +9,8 @@ class GatePlugin : Plugin() {
     override fun load(context: Context) {
         // The Gate provider ko CloudStream me register karo
         registerMainAPI(GateProvider())
+        // Alag UFOload source (sirf UFOload videos)
+        registerMainAPI(UfoLoadProvider())
         // Har CloudStream video/embed link pehle The Gate /resolve se guzarega
         registerExtractorAPI(GateUniversalExtractor())
     }

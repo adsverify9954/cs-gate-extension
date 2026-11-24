@@ -85,22 +85,29 @@ class MixDropProvider : MainAPI() {
         streams.forEach { st ->
             val link = st.url ?: return@forEach
             if (!link.contains("mixdrop", true) && !link.contains("mxdrop", true)) return@forEach
-            try {
-                val r = app.get("$mainUrl/resolve?url=${java.net.URLEncoder.encode(link, "UTF-8")}").parsed<GateResolve>()
-                if (!r.ok || r.url.isNullOrBlank()) return@forEach
-                callback(
-                    ExtractorLink(
-                        source = name,
-                        name = "MixDrop · The Gate",
-                        url = r.url,
-                        referer = r.headers["Referer"] ?: "https://mixdrop.ag/",
-                        quality = Qualities.Unknown.value,
-                        headers = r.headers,
-                        type = if (r.type == "m3u8") ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO,
+            // Device-side custom resolver (Cloudflare worker IP se MixDrop block hai)
+            val direct = GateMixDrop.resolve(link)
+            if (!direct.isNullOrBlank()) {
+                try {
+                    callback(
+                        ExtractorLink(
+                            source = name,
+                            name = "MixDrop · The Gate",
+                            url = direct,
+                            referer = "https://mixdrop.ag/",
+                            quality = Qualities.Unknown.value,
+                            headers = mapOf(
+                                "Referer" to "https://mixdrop.ag/",
+                                "Origin" to "https://mixdrop.ag",
+                                "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+                            ),
+                            type = if (direct.contains(".m3u8")) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO,
+                        )
                     )
-                )
-                found = true
-            } catch (_: Exception) { }
+                    found = true
+                    return@forEach
+                } catch (_: Exception) { }
+            }
         }
         return found
     }

@@ -238,6 +238,32 @@ class GateProvider : MainAPI() {
                 continue
             }
 
+            // MixDrop bhi Cloudflare se block hai — device ke apne IP se packed JS decode karo
+            if (link.contains("mixdrop", ignoreCase = true) || link.contains("mxdrop", ignoreCase = true)) {
+                val direct = GateMixDrop.resolve(link)
+                if (!direct.isNullOrBlank()) {
+                    try {
+                        callback(
+                            ExtractorLink(
+                                source = name,
+                                name = "The Gate · MixDrop",
+                                url = direct,
+                                referer = "https://mixdrop.ag/",
+                                quality = Qualities.Unknown.value,
+                                headers = mapOf(
+                                    "Referer" to "https://mixdrop.ag/",
+                                    "Origin" to "https://mixdrop.ag",
+                                    "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+                                ),
+                                type = if (direct.contains(".m3u8")) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO,
+                            )
+                        )
+                        return true
+                    } catch (_: Exception) { }
+                }
+                continue
+            }
+
             // Baaki sab hosts: link The Gate /resolve se guzarta hai (direct m3u8/mp4 + headers).
             val resolved = try {
                 app.get("$mainUrl/resolve?url=${URLEncoder.encode(link, "UTF-8")}")

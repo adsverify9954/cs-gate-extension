@@ -51,6 +51,31 @@ class GateUniversalExtractor : ExtractorApi() {
             return
         }
 
+        // MixDrop bhi Cloudflare se block hai — device se packed JS decode karo
+        if (url.contains("mixdrop", ignoreCase = true) || url.contains("mxdrop", ignoreCase = true)) {
+            val direct = GateMixDrop.resolve(url)
+            if (!direct.isNullOrBlank()) {
+                try {
+                    callback(
+                        ExtractorLink(
+                            source = "The Gate",
+                            name = "The Gate · MixDrop",
+                            url = direct,
+                            referer = "https://mixdrop.ag/",
+                            quality = Qualities.Unknown.value,
+                            headers = mapOf(
+                                "Referer" to "https://mixdrop.ag/",
+                                "Origin" to "https://mixdrop.ag",
+                                "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+                            ),
+                            type = if (direct.contains(".m3u8")) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO,
+                        )
+                    )
+                } catch (_: Exception) { }
+            }
+            return
+        }
+
         val resolved = try {
             app.get("https://my-anime-gate.unityads9954.workers.dev/resolve?url=${URLEncoder.encode(url, "UTF-8")}")
                 .parsed<GateResolve>().takeIf { it.ok && !it.url.isNullOrBlank() }

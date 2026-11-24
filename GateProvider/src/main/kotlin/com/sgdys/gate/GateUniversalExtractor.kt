@@ -26,23 +26,28 @@ class GateUniversalExtractor : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        // Streamtape IP-locked hai — device-side extractor se chalao
+        // Streamtape IP-locked hai — device ke apne IP se khud resolve karo
         if (url.contains("streamtape", ignoreCase = true)) {
-            try {
-                loadExtractor(url, url, subtitleCallback) { ex ->
+            val direct = GateStreamtape.resolve(url)
+            if (!direct.isNullOrBlank()) {
+                try {
                     callback(
                         ExtractorLink(
                             source = "The Gate",
                             name = "The Gate · Streamtape",
-                            url = ex.url,
-                            referer = ex.referer ?: "",
-                            quality = ex.quality,
-                            headers = ex.headers,
-                            type = ex.type,
+                            url = direct,
+                            referer = "https://streamtape.com/",
+                            quality = Qualities.Unknown.value,
+                            headers = mapOf(
+                                "Referer" to "https://streamtape.com/",
+                                "Origin" to "https://streamtape.com",
+                                "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+                            ),
+                            type = ExtractorLinkType.VIDEO,
                         )
                     )
-                }
-            } catch (_: Exception) { }
+                } catch (_: Exception) { }
+            }
             return
         }
 

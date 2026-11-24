@@ -211,25 +211,30 @@ class GateProvider : MainAPI() {
         if (ranked.isEmpty()) return false
 
         for ((link, _) in ranked) {
-            // Streamtape ke download links IP-locked hote hain — worker se phone pe chalte nahi.
-            // Inhe device-side built-in extractor se chalao (name "The Gate" hi dikhega).
+            // Streamtape IP-locked hai — device ke apne IP se khud resolve karo
+            // (CloudStream built-in extractor reliable nahi — isliye custom resolver).
             if (link.contains("streamtape", ignoreCase = true)) {
-                val ok = try {
-                    loadExtractor(link, link, subtitleCallback) { ex ->
+                val direct = GateStreamtape.resolve(link)
+                if (!direct.isNullOrBlank()) {
+                    try {
                         callback(
                             ExtractorLink(
                                 source = name,
                                 name = "The Gate · Streamtape",
-                                url = ex.url,
-                                referer = ex.referer ?: "",
-                                quality = ex.quality,
-                                headers = ex.headers,
-                                type = ex.type,
+                                url = direct,
+                                referer = "https://streamtape.com/",
+                                quality = Qualities.Unknown.value,
+                                headers = mapOf(
+                                    "Referer" to "https://streamtape.com/",
+                                    "Origin" to "https://streamtape.com",
+                                    "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+                                ),
+                                type = ExtractorLinkType.VIDEO,
                             )
                         )
-                    }
-                } catch (_: Exception) { false }
-                if (ok) return true
+                        return true
+                    } catch (_: Exception) { }
+                }
                 continue
             }
 

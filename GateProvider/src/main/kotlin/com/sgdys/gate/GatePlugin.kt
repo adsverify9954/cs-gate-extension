@@ -11,6 +11,8 @@ class GatePlugin : Plugin() {
         registerMainAPI(GateProvider())
         // Alag UFOload source (sirf UFOload videos)
         registerMainAPI(UfoLoadProvider())
+        // Alag MixDrop source (sirf MixDrop videos)
+        registerMainAPI(MixDropProvider())
         // Har CloudStream video/embed link pehle The Gate /resolve se guzarega
         registerExtractorAPI(GateUniversalExtractor())
     }

@@ -25,18 +25,16 @@ object GateMixDrop {
     private fun unpack(input: String): String? {
         val raw = input.trim()
         if (!raw.contains("eval(function(p,a,c,k,e")) return null
-        val m = Regex("""}\('((?:[^'\\]|\\.)*)',(\d+),(\d+),'([^']*)'""").find(raw) ?: return null
+        // Node se verified exact pattern
+        val m = Regex("""eval\(function\(p,a,c,k,e,d\)\{[\s\S]*?\}\('((?:[^'\\]|\\.)*)',(\d+),(\d+),'([^']*)'""").find(raw) ?: return null
         val p = m.groupValues[1].replace("\\'", "'").replace("\\\\", "\\")
         val base = m.groupValues[2].toIntOrNull() ?: 62
         val count = m.groupValues[3].toIntOrNull() ?: 0
         val words = m.groupValues[4].split("|")
-        var decoded = p
-        for (i in count - 1 downTo 0) {
-            val token = encodeBase(i, base)
-            val rep = words.getOrNull(i) ?: token
-            if (rep != token) decoded = decoded.replace(Regex("\\b${Regex.escape(token)}\\b"), rep)
-        }
-        return decoded
+        val dict = HashMap<String, String>()
+        for (i in 0 until count) dict[encodeBase(i, base)] = words.getOrNull(i) ?: encodeBase(i, base)
+        // single-pass token replace (proven approach)
+        return Regex("""\b\w+\b""").replace(p) { match -> dict[match.value] ?: match.value }
     }
 
     suspend fun resolve(input: String): String? {
@@ -55,10 +53,9 @@ object GateMixDrop {
                     if (!body.contains("wurl", true) && !body.contains("MDCore", true)) continue
                     val unpacked = unpack(body)
                     val text = unpacked ?: body
-                    val wurl = Regex("""(?:MDCore\.wurl|wurl)\s*=\s*['"]([^'"]+)['"]""", RegexOption.IGNORE_CASE).find(text)
-                        ?: Regex("""https?:[^'"\s]+\.(?:m3u8|mp4)[^'"\s]*""", RegexOption.IGNORE_CASE).find(text)
-                    if (wurl != null) {
-                        var u = wurl.groupValues[1].replace("\\/", "/")
+                    val wm = Regex("""(?:MDCore\.wurl|wurl)\s*=\s*['"]([^'"]+)['"]""", RegexOption.IGNORE_CASE).find(text)
+                    if (wm != null) {
+                        var u = wm.groupValues[1].replace("\\/", "/")
                         if (u.startsWith("//")) u = "https:$u"
                         if (u.startsWith("http")) return u
                     }

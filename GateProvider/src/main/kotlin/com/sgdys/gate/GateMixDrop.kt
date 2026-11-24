@@ -8,7 +8,13 @@ import com.lagradost.cloudstream3.app
  */
 object GateMixDrop {
     private val ID_RE = Regex("/(?:e|f|v)/([A-Za-z0-9]+)", RegexOption.IGNORE_CASE)
-    private val HOSTS = listOf("mxdrop.click", "mixdrop.co", "mixdrop.ag", "mixdrop.to")
+    private val HOSTS = listOf(
+        "mxdrop.click", "mixdrop.co", "mixdrop.ag", "mixdrop.to",
+        // worker EMBED_RE jitne mirror hosts cover karta hai, device resolver bhi —
+        // MixDrop embed kisi bhi mirror pe ho sakta hai, fail-fast na ho.
+        "mixdrop.top", "mixdrop.ws", "mixdrop.fm", "mixdrop.nu",
+        "mixdrop.ch", "mixdrop.sx", "mixdrop.io", "mixdrop.net", "mixdrop.com",
+    )
     private val ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
     private fun encodeBase(value: Int, base: Int): String {

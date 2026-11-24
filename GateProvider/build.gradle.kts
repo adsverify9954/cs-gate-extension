@@ -1,5 +1,5 @@
 // Use an integer for version numbers — har release pe bump karo
-version = 13
+version = 15
 
 cloudstream {
     description = "The Gate — sirf The Gate. Har video link worker ke /resolve se, direct m3u8 + headers. Koi doosra source nahi."
@@ -18,4 +18,9 @@ cloudstream {
 
     requiresResources = false
     language = "en"
+}
+
+// kotlinx-coroutines app me pehle se hai (CloudStream) — compileOnly, bundle nahi hota
+dependencies {
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 }

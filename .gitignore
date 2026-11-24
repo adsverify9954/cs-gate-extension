@@ -10,3 +10,5 @@
 .cxx
 local.properties
 .vscode
+# Streamtape credentials — local build only, GitHub pe kabhi nahi
+GateProvider/src/main/kotlin/com/sgdys/gate/GateCreds.kt
